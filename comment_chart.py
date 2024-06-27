@@ -1,5 +1,6 @@
 from flask import Flask, render_template  # , url_for
 from flask_pymongo import PyMongo
+from datetime import datetime, timedelta
 
 
 app = Flask(__name__)
@@ -10,38 +11,36 @@ app.config["MONGO_URI"] = "mongodb://localhost:27017/filoDB"
 mongodb_client = PyMongo(app)
 my_db = mongodb_client.db
 collection = my_db['comment']
-cm = collection.find().limit(50)
-posts = [record for record in cm]  # It's better to use list(data)
 
-comments = collection.find()
+
+date_str = "1398/05/25"
+
+query = {
+    'createDate': {'$gt': date_str}
+}
+
+comments = collection.find(query)
 dates = [record for record in comments]
 
 dates_dict = {}
-
-# while len(dates_dict) > 30:
 
 for item in dates[::-1]:
     if item['createDate'] in dates_dict:
         dates_dict[item['createDate']] += 1
     else:
         dates_dict[item['createDate']] = 1
-    if len(dates_dict) > 30:
+    if len(dates_dict) > 29:
         break
 
 keys_list = list(dates_dict.keys())
 values_list = list(dates_dict.values())
 
-# print(values_list)
+print(len(values_list))
 
 
 @app.route("/")
 def comment_chart():
     return render_template('chart.html', labels=keys_list[::-1], values=values_list[::-1], title='Timeline')
-
-
-@app.route("/comment")
-def comment():
-    return render_template('comment.html', posts=dates, title='List')
 
 
 if __name__ == "__main__":
