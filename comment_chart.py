@@ -1,6 +1,5 @@
-from flask import Flask, render_template  # , url_for
+from flask import Flask, render_template
 from flask_pymongo import PyMongo
-from datetime import datetime, timedelta
 
 
 app = Flask(__name__)
@@ -20,7 +19,7 @@ query = {
 }
 
 comments = collection.find(query)
-dates = [record for record in comments]
+dates = list(comments)
 
 dates_dict = {}
 
